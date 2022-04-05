@@ -11,3 +11,6 @@ categories = ["development-tools::debugging"]
 
 [lib]
 crate-type = ["staticlib", "rlib"]
+
+[dependencies]
+cubob = "0.3"
