@@ -1,0 +1,13 @@
+[package]
+name = "cadom"
+version = "0.1.0"
+edition = "2018"
+authors = ["Artyom Sakharilenko <kryvashek@gmail.com>"]
+description = "Some error-processing helpers for Rust"
+repository = "https://github.com/kryvashek/cadom"
+license = "MIT"
+keywords = ["error", "thiserror", "anyhow", "utils", "error-management"]
+categories = ["development-tools::debugging"]
+
+[lib]
+crate-type = ["staticlib", "rlib"]
