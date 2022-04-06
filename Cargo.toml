@@ -14,3 +14,4 @@ crate-type = ["staticlib", "rlib"]
 
 [dependencies]
 cubob = "0.3"
+thiserror = "1"

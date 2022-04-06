@@ -101,7 +101,7 @@ macro_rules! note {
     };
 
     ($format:expr, $($rest:tt)*) => {
-        $crate::Note::from(format!($text, $($rest)*))
+        $crate::Note::from(format!($format, $($rest)*))
     };
 }
 
