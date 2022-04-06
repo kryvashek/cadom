@@ -49,6 +49,16 @@ impl CodePlaceChain {
             tail: Some(Box::new(self)),
         }
     }
+
+    pub fn prepend_mut(&mut self, place: CodePlace) -> &mut Self {
+        let mut new_node = Self {
+            head: place,
+            tail: None,
+        };
+        std::mem::swap(self, &mut new_node);
+        self.tail = Some(Box::new(new_node));
+        self
+    }
 }
 
 impl From<CodePlace> for CodePlaceChain {

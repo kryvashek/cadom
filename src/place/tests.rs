@@ -63,3 +63,19 @@ fn chain_debug() {
         "[src/place/tests.rs:60:72, src/place/tests.rs:4:37]"
     );
 }
+
+#[test]
+fn chain_prepend_mut() {
+    let mut chain = CodePlaceChain::from(TEST_PLACE.clone());
+    assert_eq!(&format!("{}", chain), "[src/place/tests.rs:3:71]");
+    chain.prepend_mut(place!());
+    assert_eq!(
+        &format!("{}", chain),
+        "[src/place/tests.rs:71:23, src/place/tests.rs:3:71]"
+    );
+    chain.prepend_mut(place!());
+    assert_eq!(
+        &format!("{}", chain),
+        "[src/place/tests.rs:76:23, src/place/tests.rs:71:23, src/place/tests.rs:3:71]"
+    );
+}
