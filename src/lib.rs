@@ -5,6 +5,6 @@ mod note;
 #[macro_use]
 mod decay;
 
-pub use decay::Decay;
+pub use decay::{Decay, IntoDecay};
 pub use note::Note;
 pub use place::{CodePlace, CodePlaceChain};

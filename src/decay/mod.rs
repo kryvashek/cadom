@@ -66,45 +66,45 @@ impl<O: StdError> Decay<O> {
         }
     }
 
-    pub fn morph<E: Into<I>, I: IntoDecay<O>, N: Into<Note>>(
-        place: CodePlace,
+    pub fn morph<N: Into<Note>, E: IntoDecay<O, L>, const L: usize>(
+        new_place: CodePlace,
         note: N,
     ) -> impl FnOnce(E) -> Self {
-        |error: E| error.into().into_decay().further(place, note)
+        |error: E| error.into_decay().further(new_place, note)
     }
 
-    pub fn morph_unnoted<E: Into<I>, I: IntoDecay<O>>(place: CodePlace) -> impl FnOnce(E) -> Self {
-        |error: E| error.into().into_decay().further_unnoted(place)
-    }
-}
-
-struct DecayProxy<O: StdError>(Decay<O>);
-
-impl<O: StdError> From<Decay<O>> for DecayProxy<O> {
-    fn from(src: Decay<O>) -> Self {
-        Self(src)
+    pub fn morph_unnoted<E: IntoDecay<O, L>, const L: usize>(
+        new_place: CodePlace,
+    ) -> impl FnOnce(E) -> Self {
+        |error: E| error.into_decay().further_unnoted(new_place)
     }
 }
 
-pub trait IntoDecay<O: StdError> {
+impl<O: StdError> From<O> for Decay<O> {
+    fn from(error: O) -> Self {
+        Decay::External { error }
+    }
+}
+
+pub trait IntoDecay<O: StdError, const L: usize> {
     fn into_decay(self) -> Decay<O>;
 }
 
-impl<O: StdError> IntoDecay<O> for DecayProxy<O> {
+impl<O: StdError> IntoDecay<O, 0> for Decay<O> {
     fn into_decay(self) -> Decay<O> {
-        self.0
+        self
     }
 }
 
-impl<O: StdError> IntoDecay<O> for O {
+impl<O: StdError> IntoDecay<O, 1> for O {
     fn into_decay(self) -> Decay<O> {
-        Decay::External { error: self }
+        self.into()
     }
 }
 
-impl<O: StdError> Debug for Decay<O> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        Display::fmt(&self, f)
+impl<E: Into<O>, O: StdError + IntoDecay<O, 1>> IntoDecay<O, 2> for E {
+    fn into_decay(self) -> Decay<O> {
+        self.into().into_decay()
     }
 }
 
@@ -122,6 +122,12 @@ impl<O: StdError> Display for Decay<O> {
             }
         });
         output.finish()
+    }
+}
+
+impl<O: StdError> Debug for Decay<O> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        Display::fmt(&self, f)
     }
 }
 
@@ -185,3 +191,6 @@ macro_rules! rot {
         $crate::Decay::morph(place!(), format!($format, $($rest)*))
     };
 }
+
+#[cfg(test)]
+mod tests;

@@ -6,9 +6,9 @@ use std::{
 
 #[derive(Clone, PartialEq, Eq)]
 pub struct CodePlace {
-    file: &'static str,
-    line: u32,
-    column: u32,
+    pub file: &'static str,
+    pub line: u32,
+    pub column: u32,
 }
 
 impl CodePlace {
