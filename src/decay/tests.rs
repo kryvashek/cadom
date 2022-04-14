@@ -65,7 +65,7 @@ fn external_parse_error_morph_unnoted_once() {
                 None => panic!("Exactly one place should be added"),
                 Some(cp) => {
                     assert_eq!(cp.file, "src/decay/tests.rs");
-                    assert_eq!(cp.line, 48);
+                    assert_eq!(cp.line, 52);
                     assert_eq!(cp.column, 22);
                 }
             }
@@ -94,7 +94,7 @@ fn external_custom_error_morph_once_str() {
                 None => panic!("Exactly one place should be added"),
                 Some(cp) => {
                     assert_eq!(cp.file, "src/decay/tests.rs");
-                    assert_eq!(cp.line, 72);
+                    assert_eq!(cp.line, 81);
                     assert_eq!(cp.column, 22);
                 }
             }
@@ -118,7 +118,7 @@ fn new_error_morph_thrice_string() {
                 None => panic!("Exactly one place should be added"),
                 Some(cp) => {
                     assert_eq!(cp.file, "src/decay/tests.rs");
-                    assert_eq!(cp.line, 97);
+                    assert_eq!(cp.line, 111);
                     assert_eq!(cp.column, 22);
                 }
             }
@@ -139,7 +139,7 @@ fn new_error_morph_thrice_string() {
                 None => panic!("Exactly two places should be added (this should be the last one)"),
                 Some(cp) => {
                     assert_eq!(cp.file, "src/decay/tests.rs");
-                    assert_eq!(cp.line, 96);
+                    assert_eq!(cp.line, 110);
                     assert_eq!(cp.column, 22);
                 }
             }
@@ -147,12 +147,41 @@ fn new_error_morph_thrice_string() {
                 None => panic!("Exactly two places should be added (this should be the first one)"),
                 Some(cp) => {
                     assert_eq!(cp.file, "src/decay/tests.rs");
-                    assert_eq!(cp.line, 95);
+                    assert_eq!(cp.line, 109);
                     assert_eq!(cp.column, 23);
                 }
             }
             assert_eq!(places_iter.next(), None);
         }
         _ => panic!("Fail variant should be Decay::Internal"),
+    }
+}
+
+#[test]
+fn external_custom_error_morph_once_from_o() {
+    let custom_error = FailKind::Custom("Text representing some error".into());
+    let fail: Fail = rot!("Some note")(custom_error.clone());
+
+    match fail {
+        Decay::Further { error, note, place } => {
+            assert_eq!(
+                error.deref(),
+                &Decay::External {
+                    error: custom_error
+                }
+            );
+            assert_eq!(note.text(), Some("Some note"));
+            let mut places_iter = place.into_iter();
+            match places_iter.next() {
+                None => panic!("Exactly one place should be added"),
+                Some(cp) => {
+                    assert_eq!(cp.file, "src/decay/tests.rs");
+                    assert_eq!(cp.line, 163);
+                    assert_eq!(cp.column, 22);
+                }
+            }
+            assert_eq!(places_iter.next(), None);
+        }
+        _ => panic!("Fail variant should be Decay::Further"),
     }
 }

@@ -96,15 +96,9 @@ impl<O: StdError> IntoDecay<O, 0> for Decay<O> {
     }
 }
 
-impl<O: StdError> IntoDecay<O, 1> for O {
+impl<E: Into<O>, O: StdError> IntoDecay<O, 1> for E {
     fn into_decay(self) -> Decay<O> {
-        self.into()
-    }
-}
-
-impl<E: Into<O>, O: StdError + IntoDecay<O, 1>> IntoDecay<O, 2> for E {
-    fn into_decay(self) -> Decay<O> {
-        self.into().into_decay()
+        self.into().into()
     }
 }
 
@@ -165,30 +159,30 @@ impl<O: StdError> FusedIterator for DecayIter<'_, O> {}
 #[macro_export]
 macro_rules! decay {
     () => {
-        $crate::Decay::new_unnoted(place!())
+        $crate::Decay::new_unnoted($crate::place!())
     };
 
     ($text:expr) => {
-        $crate::Decay::new(place!(), $text)
+        $crate::Decay::new($crate::place!(), $text)
     };
 
     ($format:expr, $($rest:tt)*) => {
-        $crate::Decay::new(place!(), format!($format, $($rest)*))
+        $crate::Decay::new($crate::place!(), format!($format, $($rest)*))
     };
 }
 
 #[macro_export]
 macro_rules! rot {
     () => {
-        $crate::Decay::morph_unnoted(place!())
+        $crate::Decay::morph_unnoted($crate::place!())
     };
 
     ($text:expr) => {
-        $crate::Decay::morph(place!(), $text)
+        $crate::Decay::morph($crate::place!(), $text)
     };
 
     ($format:expr, $($rest:tt)*) => {
-        $crate::Decay::morph(place!(), format!($format, $($rest)*))
+        $crate::Decay::morph($crate::place!(), format!($format, $($rest)*))
     };
 }
 
