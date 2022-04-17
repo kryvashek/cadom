@@ -7,7 +7,7 @@ use std::{
 
 use crate::{CodePlace, CodePlaceChain, Note};
 
-#[derive(thiserror::Error, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub enum Decay<O: StdError> {
     Internal {
         note: Note,
@@ -155,6 +155,16 @@ impl<'a, O: StdError> Iterator for DecayIter<'a, O> {
 }
 
 impl<O: StdError> FusedIterator for DecayIter<'_, O> {}
+
+impl<O: StdError + 'static> StdError for Decay<O> {
+    fn source(&self) -> Option<&(dyn StdError + 'static)> {
+        match self {
+            Decay::Internal { .. } => None,
+            Decay::External { error } => Some(error),
+            Decay::Further { error, .. } => Some(error),
+        }
+    }
+}
 
 #[macro_export]
 macro_rules! decay {
