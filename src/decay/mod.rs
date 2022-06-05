@@ -109,10 +109,8 @@ impl<O: StdError> Display for Decay<O> {
             Decay::External { error } => {
                 output.field(&"error", error);
             }
-            Decay::Internal { note, place } | Decay::Further { note, place, .. } => {
-                output
-                    .field(&"place", place)
-                    .field_opt(&"note", &note.text());
+            Decay::Internal { note, .. } | Decay::Further { note, .. } => {
+                output.field_opt(&"note", &note.text());
             }
         });
         output.finish()
@@ -121,7 +119,18 @@ impl<O: StdError> Display for Decay<O> {
 
 impl<O: StdError> Debug for Decay<O> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        Display::fmt(&self, f)
+        let mut output = StructShow::new(f, Alternate::Inherit);
+        self.into_iter().for_each(|decay| match decay {
+            Decay::External { error } => {
+                output.field(&"error", error);
+            }
+            Decay::Internal { note, place } | Decay::Further { note, place, .. } => {
+                output
+                    .field_override(&"place", place, Alternate::OneLine)
+                    .field_opt(&"note", &note.text());
+            }
+        });
+        output.finish()
     }
 }
 
