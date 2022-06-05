@@ -63,28 +63,18 @@ As can be seen, information about every place in code an error passed while prog
 To fulfill the example, here is the prettified version of the example output:
 ```console
 {
-    place: [
-        src/main.rs:34:87,
-        src/main.rs:27:60,
-    ],
+    place: [src/main.rs:34:87, src/main.rs:27:60],
     note: Passed text ('Dramatically unsuitable text') is soooo unsuitable it generated a special error,
 }
 {
-    place: [
-        src/main.rs:36:104,
-        src/main.rs:28:46,
-    ],
+    place: [src/main.rs:36:104, src/main.rs:28:46],
     note: Passed text can`t be parsed as u8,
     error: invalid digit found in string,
 }
 {
-    place: [
-        src/main.rs:38:55,
-    ],
+    place: [src/main.rs:38:55],
     note: No data were passed into function,
-    place: [
-        src/main.rs:29:40,
-    ],
+    place: [src/main.rs:29:40],
     error: Unimplemented functionality,
 }
 ```
