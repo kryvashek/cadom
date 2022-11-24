@@ -12,6 +12,6 @@ mod serde;
 
 #[cfg(feature = "serde")]
 pub use self::serde::{DecayDeser, DecayDeserInner, DecayDeserItem};
-pub use decay::{Decay, IntoDecay};
+pub use decay::{Decay, DecayRoot, IntoDecay};
 pub use note::Note;
 pub use place::{CodePlace, CodePlaceChain};
