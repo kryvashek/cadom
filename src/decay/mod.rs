@@ -3,6 +3,7 @@ use std::{
     error::Error as StdError,
     fmt::{Debug, Display, Formatter, Result as FmtResult},
     iter::FusedIterator,
+    ops::Deref,
 };
 
 use crate::{CodePlace, CodePlaceChain, Note};
@@ -77,6 +78,20 @@ impl<O: StdError> Decay<O> {
         new_place: CodePlace,
     ) -> impl FnOnce(E) -> Self {
         |error: E| error.into_decay().further_unnoted(new_place)
+    }
+
+    pub fn root(&self) -> DecayRoot<'_, O> {
+        let mut current = self;
+        loop {
+            match current {
+                Self::Further { ref error, .. } => current = error.deref(),
+                Self::Internal {
+                    ref note,
+                    ref place,
+                } => return DecayRoot::Internal { note, place },
+                Self::External { ref error } => return DecayRoot::External { error },
+            }
+        }
     }
 }
 
@@ -173,6 +188,17 @@ impl<O: StdError + 'static> StdError for Decay<O> {
             Decay::Further { error, .. } => Some(error),
         }
     }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum DecayRoot<'a, O: StdError> {
+    Internal {
+        note: &'a Note,
+        place: &'a CodePlaceChain,
+    },
+    External {
+        error: &'a O,
+    },
 }
 
 #[macro_export]
