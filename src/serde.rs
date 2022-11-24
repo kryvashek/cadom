@@ -40,9 +40,10 @@ impl<O: StdError + Serialize> Serialize for Decay<O> {
 #[cfg(feature = "schema")]
 #[cfg_attr(docsrs, doc(cfg(all(feature = "serde", feature = "schema"))))]
 impl<O: StdError + Serialize + JsonSchema> JsonSchema for Decay<O> {
+    /// Always returns true since [Decay] is complex enough to be referenced when possible.
     #[inline]
     fn is_referenceable() -> bool {
-        false
+        true
     }
 
     /// Will return name like "Decay(<smth>)", where <smth> is the type O schema name.
