@@ -1,3 +1,5 @@
+#[cfg(feature = "schema")]
+use schemars::{gen::SchemaGenerator, schema::Schema, JsonSchema};
 use serde::{Deserialize, Serialize, Serializer};
 use std::{
     borrow::{Borrow, BorrowMut},
@@ -35,7 +37,34 @@ impl<O: StdError + Serialize> Serialize for Decay<O> {
     }
 }
 
+#[cfg(feature = "schema")]
+#[cfg_attr(docsrs, doc(cfg(all(feature = "serde", feature = "schema"))))]
+impl<O: StdError + Serialize + JsonSchema> JsonSchema for Decay<O> {
+    #[inline]
+    fn is_referenceable() -> bool {
+        false
+    }
+
+    /// Will return name like "Decay(<smth>)", where <smth> is the type O schema name.
+    /// Avoids redundant memory allocation by writing into the same [String],
+    /// but can't avoid copying bytes of the type O schema name (shifts them).
+    fn schema_name() -> String {
+        let mut name = <O as JsonSchema>::schema_name();
+        name.insert_str(0, "Decay(");
+        name.push(')');
+        name
+    }
+
+    /// Since [Decay] serializes just the same way as [DecayDeser],
+    /// they obviously share the same schema, which is returned here.
+    #[inline]
+    fn json_schema(gen: &mut SchemaGenerator) -> Schema {
+        <DecayDeser<O> as JsonSchema>::json_schema(gen)
+    }
+}
+
 #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+#[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum DecayDeserItem<O: StdError> {
@@ -46,6 +75,7 @@ pub enum DecayDeserItem<O: StdError> {
 pub type DecayDeserInner<O> = Vec<DecayDeserItem<O>>;
 
 #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+#[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DecayDeser<O: StdError>(DecayDeserInner<O>);
 
