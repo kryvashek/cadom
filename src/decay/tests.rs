@@ -185,3 +185,49 @@ fn external_custom_error_morph_once_from_o() {
         _ => panic!("Fail variant should be Decay::Further"),
     }
 }
+
+#[test]
+fn decay_root_internal() {
+    let start: Fail = decay!("Dumb sample error with text '{}'", "text of error");
+    let fail: Fail = rot!()(start);
+    let fail: Fail = rot!("Some note #{}, formatted", 2)(fail);
+
+    match fail.root() {
+        DecayRoot::External { .. } => panic!("Expected DecayRoot::Internal"),
+        DecayRoot::Internal { note, place } => {
+            assert_eq!(
+                note.text(),
+                Some("Dumb sample error with text 'text of error'")
+            );
+            let mut places_iter = place.into_iter();
+            match places_iter.next() {
+                None => panic!("Exactly two places should be added (no second found)"),
+                Some(cp) => {
+                    assert_eq!(cp.file, "src/decay/tests.rs");
+                    assert_eq!(cp.line, 192);
+                    assert_eq!(cp.column, 22);
+                }
+            }
+            match places_iter.next() {
+                None => panic!("Exactly two places should be added (no first found)"),
+                Some(cp) => {
+                    assert_eq!(cp.file, "src/decay/tests.rs");
+                    assert_eq!(cp.line, 191);
+                    assert_eq!(cp.column, 23);
+                }
+            }
+            assert_eq!(places_iter.next(), None);
+        }
+    }
+}
+
+#[test]
+fn decay_root_external() {
+    let custom_error = FailKind::Custom("Text representing some error".into());
+    let fail: Fail = rot!("Some note")(custom_error.clone());
+
+    match fail.root() {
+        DecayRoot::Internal { .. } => panic!("Expected DecayRoot::External"),
+        DecayRoot::External { error } => assert_eq!(error, &custom_error),
+    }
+}
