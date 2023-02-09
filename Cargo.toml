@@ -24,6 +24,8 @@ serde_json = "1.0"
 [features]
 default = []
 
+all = ["serde", "schema"]
+
 schema = ["serde", "schemars"]
 
 [package.metadata.docs.rs]
