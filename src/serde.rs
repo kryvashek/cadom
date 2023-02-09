@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize, Serializer};
 use std::{
     borrow::{Borrow, BorrowMut},
     error::Error as StdError,
+    fmt::{Display, Formatter, Result as FmtResult},
     ops::{Deref, DerefMut},
 };
 
@@ -71,6 +72,15 @@ impl<O: StdError + Serialize + JsonSchema> JsonSchema for Decay<O> {
 pub enum DecayDeserItem<O: StdError> {
     Internal(String),
     External(O),
+}
+
+impl<O: StdError + Display> Display for DecayDeserItem<O> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        match self {
+            DecayDeserItem::Internal(x) => f.write_str(x),
+            DecayDeserItem::External(o) => Display::fmt(o, f),
+        }
+    }
 }
 
 pub type DecayDeserInner<O> = Vec<DecayDeserItem<O>>;
@@ -157,6 +167,12 @@ impl<O: StdError> DecayDeser<O> {
     #[inline]
     pub fn inner_mut(&mut self) -> &mut DecayDeserInner<O> {
         &mut self.0
+    }
+}
+
+impl<O: StdError + Display> Display for DecayDeser<O> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        cubob::display_list_from_iter(f, self.0.iter())
     }
 }
 
